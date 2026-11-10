@@ -1,358 +1,676 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>сухость — официальный мини-сайт</title>
-<style>
-  :root {
-    --bg-dark: #050505;
-    --bg-light: #141414;
-    --text-main: #d4d4d4;
-    --text-muted: #888;
-    --blood: #8a0303;
-    --blood-bright: #b31010;
-    --metal: linear-gradient(180deg, #ffffff 0%, #999999 45%, #555555 55%, #ffffff 100%);
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; }
-  body {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    background: radial-gradient(circle at 50% 40%, var(--bg-light) 0%, var(--bg-dark) 100%);
-    color: var(--text-main);
-    overflow-x: hidden;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-  }
-  
-  /* Пыль/пепел на фоне */
-  #dust {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .grain {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.04;
-    z-index: 1;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>сухость</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@300;400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030303;
+            --text-main: #e5e5e5;
+            --text-muted: #6b6b6b;
+            --accent-red: #d90000;
+            --accent-orange: #ff8800;
+            --glass-bg: rgba(12, 12, 12, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
 
-  header {
-    position: relative;
-    z-index: 2;
-    padding: 3rem 1.5rem 1rem;
-    text-align: center;
-  }
-  .badge {
-    display: inline-block;
-    font-family: 'Courier New', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.35em;
-    text-transform: uppercase;
-    color: var(--blood);
-    border: 1px solid var(--blood);
-    padding: 0.4rem 1rem;
-    border-radius: 999px;
-    margin-bottom: 1.5rem;
-    background: rgba(0, 0, 0, 0.3);
-    box-shadow: 0 0 15px rgba(138, 3, 3, 0.2);
-  }
-  
-  /* Металлический текст для заголовка */
-  h1 {
-    font-size: clamp(3rem, 12vw, 7rem);
-    line-height: 0.95;
-    font-weight: normal;
-    letter-spacing: -0.03em;
-    background: var(--metal);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8)) drop-shadow(0 0 20px rgba(255,255,255,0.1));
-    margin-bottom: 0.3rem;
-    position: relative;
-  }
-  h1 .dot { 
-    color: var(--blood);
-    -webkit-text-fill-color: var(--blood);
-    filter: drop-shadow(0 0 8px var(--blood));
-  }
-  .sub {
-    font-family: 'Courier New', monospace;
-    font-size: 0.85rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-top: 0.5rem;
-    text-shadow: 0 0 10px rgba(255,255,255,0.1);
-  }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  main {
-    position: relative;
-    z-index: 2;
-    flex: 1;
-    width: 100%;
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem 4rem;
-  }
+        html {
+            scroll-behavior: smooth;
+        }
 
-  .card {
-    background: rgba(10, 10, 10, 0.6);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 1.6rem 1.8rem;
-    margin-bottom: 1.4rem;
-    box-shadow: 0 20px 40px -15px rgba(0,0,0,0.8);
-    animation: rise 0.9s cubic-bezier(.2,.8,.2,1) both;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  /* Легкое красное свечение внутри карточек */
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 20%; width: 60%; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(138, 3, 3, 0.5), transparent);
-  }
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
 
-  .card:nth-child(1){ animation-delay: 0.05s; }
-  .card:nth-child(2){ animation-delay: 0.15s; }
-  .card:nth-child(3){ animation-delay: 0.25s; }
+        /* --- WebGL Шейдерный Фон --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.7;
+        }
 
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 30%, #000 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
 
-  .lead {
-    font-size: 1.15rem;
-    line-height: 1.7;
-    color: var(--text-main);
-  }
-  .lead em { 
-    color: #fff; 
-    font-style: italic; 
-    text-shadow: 0 0 8px rgba(255,255,255,0.3);
-  }
+        /* --- HUD Элементы (Интерфейс) --- */
+        .hud {
+            position: fixed;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.3);
+            z-index: 10;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .hud-tl { top: 20px; left: 20px; }
+        .hud-tr { top: 20px; right: 20px; text-align: right; }
+        .hud-bl { bottom: 20px; left: 20px; }
+        .hud-br { bottom: 20px; right: 20px; text-align: right; }
+        
+        .hud span { color: var(--accent-red); }
 
-  h2 {
-    font-size: 0.78rem;
-    font-family: 'Courier New', monospace;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 0.9rem;
-  }
+        /* --- Секция Hero --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
 
-  .facts { list-style: none; }
-  .facts li {
-    padding: 0.55rem 0 0.55rem 1.8rem;
-    position: relative;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
-    line-height: 1.5;
-    color: #bbb;
-  }
-  .facts li:last-child { border-bottom: none; }
-  .facts li::before {
-    content: "◌";
-    position: absolute;
-    left: 0;
-    color: var(--blood-bright);
-    font-size: 1.1rem;
-    top: 0.4rem;
-    text-shadow: 0 0 5px var(--blood);
-  }
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(4rem, 15vw, 10rem);
+            letter-spacing: 0.1em;
+            text-transform: lowercase;
+            color: #fff;
+            position: relative;
+            text-shadow: 
+                0 0 10px rgba(255,255,255,0.2),
+                2px 2px 0px rgba(217,0,0,0.5),
+                -2px -2px 0px rgba(0,255,255,0.3);
+            animation: glitch-anim 3s infinite alternate;
+        }
 
-  .quote-box {
-    text-align: center;
-    min-height: 4.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 0 1rem;
-  }
-  #quote {
-    font-size: 1.15rem;
-    font-style: italic;
-    line-height: 1.6;
-    color: #fff;
-    max-width: 34ch;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-  }
-  
-  button {
-    font-family: 'Courier New', monospace;
-    font-size: 0.8rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    background: rgba(138, 3, 3, 0.2);
-    color: #fff;
-    border: 1px solid var(--blood);
-    padding: 0.9rem 1.6rem;
-    border-radius: 4px; /* Более острые углы */
-    cursor: pointer;
-    display: block;
-    margin: 0 auto;
-    transition: all 0.3s ease;
-  }
-  button:hover { 
-    background: var(--blood); 
-    box-shadow: 0 0 20px rgba(138, 3, 3, 0.6);
-  }
-  button:active { transform: scale(0.98); }
+        @keyframes glitch-anim {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
 
-  footer {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    padding: 2rem 1rem 3rem;
-    font-family: 'Courier New', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-  footer .cursor {
-    display: inline-block;
-    width: 0.6ch;
-    background: var(--blood);
-    animation: blink 1.2s steps(1) infinite;
-  }
-  @keyframes blink { 50% { opacity: 0; } }
-</style>
+        .subtitle {
+            font-size: 0.9rem;
+            letter-spacing: 0.6em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-top: 20px;
+            animation: fadeInUp 1s ease 0.5s both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Общие стили для секций --- */
+        .content-section {
+            min-height: 80vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 80px 20px;
+            z-index: 1;
+            position: relative;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.5rem;
+            color: var(--accent-red);
+            margin-bottom: 60px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(217, 0, 0, 0.4);
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Декоративные линии вокруг заголовка секции */
+        .section-title::before, .section-title::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40px;
+            height: 1px;
+            background: rgba(217, 0, 0, 0.3);
+        }
+        .section-title::before { right: 100%; margin-right: 20px; }
+        .section-title::after { left: 100%; margin-left: 20px; }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1s cubic-bezier(0.2, 0.9, 0.3, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Секция Профиля (Карточка) --- */
+        .profile-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.2s ease-out, box-shadow 0.3s ease;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .profile-card:hover {
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7), 0 0 30px rgba(217,0,0,0.15);
+        }
+
+        .profile-info h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-orange);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-orange);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-orange);
+            animation: pulse-status 1.5s infinite;
+        }
+
+        @keyframes pulse-status {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .owner-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 136, 0, 0.08);
+            border: 1px solid rgba(255, 136, 0, 0.3);
+            color: var(--accent-orange);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            box-shadow: 0 0 20px rgba(255, 136, 0, 0.1);
+            margin-top: 10px;
+        }
+
+        .owner-badge svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* --- Секция "Аксиомы" --- */
+        .facts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        .fact-card {
+            background: #050505;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 40px 30px;
+            border-radius: 4px;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        /* Угловые скобки (HUD-стиль) */
+        .card-corner {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-color: rgba(217, 0, 0, 0.5);
+            border-style: solid;
+            transition: all 0.3s ease;
+        }
+        .card-corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+        .card-corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+        .card-corner.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+        .card-corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+        .fact-card:hover {
+            background: rgba(217, 0, 0, 0.02);
+            border-color: rgba(217, 0, 0, 0.2);
+        }
+
+        .fact-card:hover .card-corner {
+            width: 20px;
+            height: 20px;
+            border-color: var(--accent-red);
+            box-shadow: 0 0 10px var(--accent-red);
+        }
+
+        .fact-tag {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-red);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .fact-card h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .fact-card p {
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        /* --- Секция Манифеста (Терминал) --- */
+        .manifesto-container {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 10px;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+        }
+
+        .manifesto-container::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ff5f56;
+            box-shadow: 18px 0 0 #ffbd2e, 36px 0 0 #27c93f;
+        }
+
+        .manifesto-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #aaa;
+            margin-top: 20px;
+            min-height: 150px;
+        }
+
+        .manifesto-text span {
+            color: #fff;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        .cursor-blink {
+            display: inline-block;
+            width: 10px;
+            height: 1.2rem;
+            background-color: var(--accent-red);
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+            margin-left: 5px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Адаптив */
+        @media (max-width: 768px) {
+            .profile-card { padding: 40px 20px; }
+            .facts-grid { grid-template-columns: 1fr; }
+            .hud { display: none; }
+            .manifesto-text { font-size: 1rem; }
+            .section-title::before, .section-title::after { display: none; }
+        }
+    </style>
 </head>
 <body>
-  <canvas id="dust"></canvas>
-  <div class="grain"></div>
 
-  <header>
-    <div class="badge">мини-сайт · 1 страница</div>
-    <h1>сухость<span class="dot">.</span></h1>
-    <div class="sub">телеграм-канал</div>
-  </header>
+    <!-- HUD Элементы -->
+    <div class="hud hud-tl">SYS.VER: <span>2.0.4</span><br>MODE: SECURE</div>
+    <div class="hud hud-tr">LAT: 55.7558<br>LON: 37.6173</div>
+    <div class="hud hud-bl">AUDIO: OFF<br>VISUAL: ON</div>
+    <div class="hud hud-br">STATUS: <span>ACTIVE</span></div>
 
-  <main>
-    <div class="card">
-      <p class="lead">
-        Этот мини-сайт был создан специально для тгк <em>«сухость»</em>.
-        Здесь нет лишних слов, только тишина, металл и сухой взгляд.
-      </p>
-    </div>
+    <!-- Фоновый WebGL-шейдер -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="vignette"></div>
 
-    <div class="card">
-      <h2>сухие факты</h2>
-      <ul class="facts">
-        <li>Сухость — это не пустота. Это предельная концентрация.</li>
-        <li>В самой сухой пустыне Атакама местами не было дождя более 400 лет.</li>
-        <li>Глаз, лишенный влаги, видит суть вещей гораздо яснее.</li>
-        <li>Влага — это вода, а вода — это лишнее.</li>
-        <li>Если вам здесь сухо — значит, всё работает как надо.</li>
-      </ul>
-    </div>
+    <!-- СЕКЦИЯ 1: Hero -->
+    <section class="hero">
+        <h1 class="title">сухость</h1>
+        <p class="subtitle">Telegram Chat</p>
+    </section>
 
-    <div class="card">
-      <h2>цитата дня</h2>
-      <div class="quote-box"><span id="quote">…</span></div>
-      <button id="newQuote">высушить ещё одну</button>
-    </div>
-  </main>
+    <!-- СЕКЦИЯ 2: Профиль Владельца -->
+    <section class="content-section">
+        <div class="profile-card reveal" id="profileCard">
+            <div class="profile-info">
+                <h2>willy</h2>
+                <div class="status">
+                    <span class="status-dot"></span> онлайн
+                </div>
+                <div class="owner-badge">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                    </svg>
+                    Владелец чата
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <footer>
-    сделано для «сухости» · <span id="year"></span> · без воды<span class="cursor">&nbsp;</span>
-  </footer>
+    <!-- СЕКЦИЯ 3: Аксиомы -->
+    <section class="content-section">
+        <h2 class="section-title reveal">// АКСИОМЫ</h2>
+        <div class="facts-grid reveal">
+            <!-- Карточка 1 -->
+            <div class="fact-card">
+                <div class="card-corner tl"></div>
+                <div class="card-corner tr"></div>
+                <div class="card-corner bl"></div>
+                <div class="card-corner br"></div>
+                <span class="fact-tag">[ 01 // БИОЛОГИЯ ]</span>
+                <h3>Барьер</h3>
+                <p>Когда влага уходит, роговой слой кожи уплотняется. Сухость — это не слабость, а эволюционная броня. Организм перекрывает доступ внешней среде, оставляя лишь необходимое.</p>
+            </div>
+            <!-- Карточка 2 -->
+            <div class="fact-card">
+                <div class="card-corner tl"></div>
+                <div class="card-corner tr"></div>
+                <div class="card-corner bl"></div>
+                <div class="card-corner br"></div>
+                <span class="fact-tag">[ 02 // АКУСТИКА ]</span>
+                <h3>Поглощение</h3>
+                <p>В сухом воздухе нет водяных паров, которые переносят звук. Поэтому в пустыне или зимнем лесу наступает абсолютная, звенящая тишина. Сухость пожирает эхо.</p>
+            </div>
+            <!-- Карточка 3 -->
+            <div class="fact-card">
+                <div class="card-corner tl"></div>
+                <div class="card-corner tr"></div>
+                <div class="card-corner bl"></div>
+                <div class="card-corner br"></div>
+                <span class="fact-tag">[ 03 // ХИМИЯ ]</span>
+                <h3>Сублимация</h3>
+                <p>Сухой лед не тает. Он минует жидкое состояние и сразу становится газом. Идеальная метафора: исчезнуть, не оставив после себя ни капли. Только холод и пар.</p>
+            </div>
+        </div>
+    </section>
 
-<script>
-  // Год в подвале
-  document.getElementById('year').textContent = new Date().getFullYear();
+    <!-- СЕКЦИЯ 4: Манифест -->
+    <section class="content-section" style="min-height: 100vh;">
+        <div class="manifesto-container reveal">
+            <div class="manifesto-text" id="typewriter-text"></div>
+        </div>
+    </section>
 
-  // Генератор сухих цитат
-  const quotes = [
-    "Сухость — это когда между строк больше, чем в строках.",
-    "Дождь — это для тех, кто не умеет ждать.",
-    "Пустыня красива тем, что в ней где-то спрятан колодец.",
-    "Не всё, что молчит, — пустое. Иногда оно просто сухое.",
-    "Меньше воды — больше смысла.",
-    "Песок не спорит с ветром. Он просто становится барханом.",
-    "Самое честное состояние вещества — сухое.",
-    "Тишина — это сухость для ушей.",
-    "В глазах пустыни нет влаги, но есть бездонная глубина.",
-    "Металл не плачет. Он ржавеет. Сухость не ржавеет."
-  ];
-  const quoteEl = document.getElementById('quote');
-  const btn = document.getElementById('newQuote');
-  let last = -1;
-  function newQuote() {
-    let i;
-    do { i = Math.floor(Math.random() * quotes.length); } while (i === last && quotes.length > 1);
-    last = i;
-    quoteEl.style.opacity = 0;
-    setTimeout(() => {
-      quoteEl.textContent = quotes[i];
-      quoteEl.style.transition = 'opacity .4s';
-      quoteEl.style.opacity = 1;
-    }, 200);
-  }
-  newQuote();
-  btn.addEventListener('click', newQuote);
+    <script>
+        // --- 1. WebGL Шейдерный Фон ---
+        const canvas = document.getElementById('bg-canvas');
+        const gl = canvas.getContext('webgl');
 
-  // Пыль/пепел на canvas
-  const canvas = document.getElementById('dust');
-  const ctx = canvas.getContext('2d');
-  let W, H, particles = [];
-  
-  function resize() {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
-  
-  function initParticles() {
-    particles = [];
-    const count = Math.min(120, Math.floor(W * H / 10000));
-    for (let i = 0; i < count; i++) {
-      particles.push({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        r: Math.random() * 1.2 + 0.2,
-        vx: (Math.random() - 0.5) * 0.15,
-        vy: (Math.random() - 0.5) * 0.15 - 0.1, // Медленно поднимаются вверх
-        a: Math.random() * 0.4 + 0.1,
-        color: Math.random() > 0.8 ? '138, 3, 3' : '255, 255, 255' // В основном белые, иногда красные
-      });
-    }
-  }
-  
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-    for (const p of particles) {
-      p.x += p.vx;
-      p.y += p.vy;
-      
-      if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
-      if (p.y > H + 10) { p.y = -10; p.x = Math.random() * W; }
-      if (p.x < -10) p.x = W + 10;
-      if (p.x > W + 10) p.x = -10;
-      
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${p.color}, ${p.a})`;
-      ctx.fill();
-    }
-    requestAnimationFrame(draw);
-  }
-  
-  window.addEventListener('resize', () => { resize(); initParticles(); });
-  resize();
-  initParticles();
-  draw();
-</script>
+        if (gl) {
+            const vsSource = `
+                attribute vec4 aVertexPosition;
+                void main() {
+                    gl_Position = aVertexPosition;
+                }
+            `;
+
+            const fsSource = `
+                precision highp float;
+                uniform vec2 u_resolution;
+                uniform float u_time;
+                uniform vec2 u_mouse;
+
+                void main() {
+                    vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+                    uv.x *= u_resolution.x / u_resolution.y;
+
+                    vec2 mouse = u_mouse / u_resolution;
+                    float dist = distance(uv, mouse);
+                    uv += (uv - mouse) * 0.1 * (1.0 / (dist + 0.5));
+
+                    float noise = sin(uv.x * 3.0 + u_time * 0.5) * cos(uv.y * 4.0 - u_time * 0.3);
+                    noise += sin(uv.y * 2.0 - u_time * 0.7) * 0.5;
+                    noise = noise * 0.5 + 0.5;
+
+                    vec3 color1 = vec3(0.02, 0.0, 0.0);
+                    vec3 color2 = vec3(0.15, 0.01, 0.01);
+                    
+                    vec3 finalColor = mix(color1, color2, noise);
+
+                    float vignette = 1.0 - smoothstep(0.3, 1.0, length(uv - 0.5));
+                    finalColor *= vignette;
+
+                    gl_FragColor = vec4(finalColor, 1.0);
+                }
+            `;
+
+            function createShader(gl, type, source) {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error('Shader error:', gl.getShaderInfoLog(shader));
+                    gl.deleteShader(shader);
+                    return null;
+                }
+                return shader;
+            }
+
+            const vertexShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
+            const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+
+            const positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            const positions = [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0];
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+            const positionLocation = gl.getAttribLocation(program, 'aVertexPosition');
+            const timeLocation = gl.getUniformLocation(program, 'u_time');
+            const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+            const mouseLocation = gl.getUniformLocation(program, 'u_mouse');
+
+            gl.enableVertexAttribArray(positionLocation);
+            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+            const mouse = { x: 0, y: 0 };
+            document.addEventListener('mousemove', (e) => {
+                mouse.x = e.clientX;
+                mouse.y = canvas.height - e.clientY;
+            });
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                gl.viewport(0, 0, canvas.width, canvas.height);
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            function render(time) {
+                time *= 0.001;
+                gl.useProgram(program);
+                gl.uniform1f(timeLocation, time);
+                gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+                gl.uniform2f(mouseLocation, mouse.x, mouse.y);
+                gl.clearColor(0.0, 0.0, 0.0, 1.0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                requestAnimationFrame(render);
+            }
+            requestAnimationFrame(render);
+        }
+
+        // --- 2. 3D-наклон карточки профиля ---
+        const card = document.getElementById('profileCard');
+        if (card) {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 20;
+                const rotateY = (centerX - x) / 20;
+
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+            });
+        }
+
+        // --- 3. Эффект печатной машинки ---
+        const lines = [
+            "Сухость — это не отсутствие влаги.",
+            "Это состояние души, когда эмоции",
+            "отфильтрованы до кристальной чистоты.",
+            "Здесь нет места лишнему шуму.",
+            "Только холодный взгляд, пульс в висках",
+            "и ритм, который ты чувствуешь кожей."
+        ];
+        
+        const typeTarget = document.getElementById('typewriter-text');
+        let hasTyped = false;
+
+        function typeWriter() {
+            if (hasTyped) return;
+            hasTyped = true;
+
+            let lineIndex = 0;
+            let charIndex = 0;
+            
+            typeTarget.innerHTML = ''; 
+            
+            const cursor = document.createElement('span');
+            cursor.className = 'cursor-blink';
+            typeTarget.appendChild(cursor);
+
+            function typeChar() {
+                if (lineIndex < lines.length) {
+                    const currentLine = lines[lineIndex];
+                    
+                    if (charIndex < currentLine.length) {
+                        let charText = currentLine.charAt(charIndex);
+                        
+                        if (lines[lineIndex].includes("состояние души") && 
+                           (charIndex >= 4 && charIndex < 18)) {
+                            let span = typeTarget.querySelector('.highlight-temp');
+                            if (!span) {
+                                span = document.createElement('span');
+                                span.className = 'highlight-temp';
+                                typeTarget.insertBefore(span, cursor);
+                            }
+                            span.appendChild(document.createTextNode(charText));
+                        } else {
+                            typeTarget.insertBefore(document.createTextNode(charText), cursor);
+                        }
+                        
+                        charIndex++;
+                        setTimeout(typeChar, 30);
+                    } else {
+                        typeTarget.insertBefore(document.createElement('br'), cursor);
+                        let span = typeTarget.querySelector('.highlight-temp');
+                        if (span) span.classList.remove('highlight-temp');
+                        
+                        lineIndex++;
+                        charIndex = 0;
+                        setTimeout(typeChar, 300);
+                    }
+                } else {
+                    const finalSpan = typeTarget.querySelector('.highlight-temp');
+                    if (finalSpan) finalSpan.className = '';
+                }
+            }
+            typeChar();
+        }
+
+        // --- 4. Появление элементов при скролле ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    
+                    if (entry.target.querySelector('#typewriter-text')) {
+                        setTimeout(typeWriter, 500);
+                    }
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.reveal').forEach((el) => {
+            observer.observe(el);
+        });
+    </script>
 </body>
 </html>
