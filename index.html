@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>сухость</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@300;400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030303;
+            --text-main: #e5e5e5;
+            --text-muted: #6b6b6b;
+            --accent-red: #d90000;
+            --accent-orange: #ff8800;
+            --glass-bg: rgba(12, 12, 12, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* --- WebGL Шейдерный Фон --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.7;
+        }
+
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 30%, #000 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- HUD Элементы (Интерфейс) --- */
+        .hud {
+            position: fixed;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.3);
+            z-index: 10;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .hud-tl { top: 20px; left: 20px; }
+        .hud-tr { top: 20px; right: 20px; text-align: right; }
+        .hud-bl { bottom: 20px; left: 20px; }
+        .hud-br { bottom: 20px; right: 20px; text-align: right; }
+        
+        .hud span { color: var(--accent-red); }
+
+        /* --- Секция Hero --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(4rem, 15vw, 10rem);
+            letter-spacing: 0.1em;
+            text-transform: lowercase;
+            color: #fff;
+            position: relative;
+            text-shadow: 
+                0 0 10px rgba(255,255,255,0.2),
+                2px 2px 0px rgba(217,0,0,0.5),
+                -2px -2px 0px rgba(0,255,255,0.3);
+            animation: glitch-anim 3s infinite alternate;
+        }
+
+        @keyframes glitch-anim {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            letter-spacing: 0.6em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-top: 20px;
+            animation: fadeInUp 1s ease 0.5s both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Общие стили для секций --- */
+        .content-section {
+            min-height: 80vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 80px 20px;
+            z-index: 1;
+            position: relative;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.5rem;
+            color: var(--accent-red);
+            margin-bottom: 60px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(217, 0, 0, 0.4);
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Декоративные линии вокруг заголовка секции */
+        .section-title::before, .section-title::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40px;
+            height: 1px;
+            background: rgba(217, 0, 0, 0.3);
+        }
+        .section-title::before { right: 100%; margin-right: 20px; }
+        .section-title::after { left: 100%; margin-left: 20px; }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1s cubic-bezier(0.2, 0.9, 0.3, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Секция Профиля (Карточка) --- */
+        .profile-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.2s ease-out, box-shadow 0.3s ease;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .profile-card:hover {
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7), 0 0 30px rgba(217,0,0,0.15);
+        }
+
+        .profile-info h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-orange);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-orange);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-orange);
+            animation: pulse-status 1.5s infinite;
+        }
+
+        @keyframes pulse-status {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .owner-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 136, 0, 0.08);
+            border: 1px solid rgba(255, 136, 0, 0.3);
+            color: var(--accent-orange);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            box-shadow: 0 0 20px rgba(255, 136, 0, 0.1);
+            margin-top: 10px;
+        }
+
+        .owner-badge svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* --- Секция "Аксиомы" --- */
+        .facts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        .fact-card {
+            background: #050505;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 40px 30px;
+            border-radius: 4px;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        /* Угловые скобки (HUD-стиль) */
+        .card-corner {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-color: rgba(217, 0, 0, 0.5);
+            border-style: solid;
+            transition: all 0.3s ease;
+        }
+        .card-corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+        .card-corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+        .card-corner.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+        .card-corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+        .fact-card:hover {
+            background: rgba(217, 0, 0, 0.02);
+            border-color: rgba(217, 0, 0, 0.2);
+        }
+
+        .fact-card:hover .card-corner {
+            width: 20px;
+            height: 20px;
+            border-color: var(--accent-red);
+            box-shadow: 0 0 10px var(--accent-red);
+        }
+
+        .fact-tag {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-red);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .fact-card h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .fact-card p {
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        /* --- Секция Манифеста (Терминал) --- */
+        .manifesto-container {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 10px;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+        }
+
+        .manifesto-container::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ff5f56;
+            box-shadow: 18px 0 0 #ffbd2e, 36px 0 0 #27c93f;
+        }
+
+        .manifesto-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #aaa;
+            margin-top: 20px;
+            min-height: 150px;
+        }
+
+        .manifesto-text span {
+            color: #fff;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        .cursor-blink {
+            display: inline-block;
+            width: 10px;
+            height: 1.2rem;
+            background-color: var(--accent-red);
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+            margin-left: 5px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Адаптив */
+        @media (max-width: 768px) {
+            .profile-card { padding: 40px 20px; }
+            .facts-grid { grid-template-columns: 1fr; }
+            .hud { display: none; }
+            .manifesto-text { font-size: 1rem; }
+            .section-title::before, .section-title::after { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HUD Элементы -->
+    <div class="hud hud-tl">SYS.VER: <span>2.0.4</span><br>MODE: SECURE</div>
+    <div class="hud hud-tr">LAT: 55.7558<br>LON: 37.6173</div>
+    <div class="hud hud-bl">AUDIO: OFF<br>VISUAL: ON</div>
+    <div class="hud hud-br">STATUS: <span>ACTIVE</span></div>
+
+    <!-- Фоновый WebGL-шейдер -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="vignette"></div>
+
+    <!-- СЕКЦИЯ 1: Hero -->
+    <section class="hero">
+        <h1 class="title">сухость</h1>
+        <p class="subtitle">Telegram Chat</p>
+    </section>
+
+    <!-- СЕКЦИЯ 2: Профиль Владельца -->
+    <section class="content-section">
+        <div class="profile-card reveal" id="profileCard">
+            <div class="profile-info">
+                <h2>willy</h2>
+                <div class="status">
+                    <span class="status-dot"></span> онлайн
+                </div>
+                <div class="owner-badge">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                    </svg>
+                    Владелец чата
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- СЕКЦИЯ 3: Аксиомы -->
+    <section class="content-section">
+        <h2 class="section-title reveal">// АКСИОМЫ</h2>
+        <div class="facts-grid reveal">
+            <!-- Карточка 1 -->
+            <div class="fact-card">
+                <div class="card-corner tl"></div>
+                <div class="card-corner tr"></div>
+                <div class="card-corner bl"></div>
+                <div class="card-corner br"></div>
+                <span class="fact-tag">[ 01 // БИОЛОГИЯ ]</span>
+                <h3>Барьер</h3>
+                <p>Когда влага уходит, роговой слой кожи уплотняется. Сухость — это не слабость, а эволюционная броня. Организм перекрывает доступ внешней среде, оставляя лишь необходимое.</p>
+            </div>
+            <!-- Карточка 2 -->
+            <div class="fact-card">
+                <div class="card-corner tl"></div>
+                <div class="card-corner tr"></div>
+                <div class="card-corner bl"></div>
+                <div class="card-corner br"></div>
+                <span class="fact-tag">[ 02 // АКУСТИКА ]</span>
+                <h3>Поглощение</h3>
+                <p>В сухом воздухе нет водяных паров, которые переносят звук. Поэтому в пустыне или зимнем лесу наступает абсолютная, звенящая тишина. Сухость пожирает эхо.</p>
+            </div>
+            <!-- Карточка 3 -->
+            <div class="fact-card">
+                <div class="card-corner tl"></div>
+                <div class="card-corner tr"></div>
+                <div class="card-corner bl"></div>
+                <div class="card-corner br"></div>
+                <span class="fact-tag">[ 03 // ХИМИЯ ]</span>
+                <h3>Сублимация</h3>
+                <p>Сухой лед не тает. Он минует жидкое состояние и сразу становится газом. Идеальная метафора: исчезнуть, не оставив после себя ни капли. Только холод и пар.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- СЕКЦИЯ 4: Манифест -->
+    <section class="content-section" style="min-height: 100vh;">
+        <div class="manifesto-container reveal">
+            <div class="manifesto-text" id="typewriter-text"></div>
+        </div>
+    </section>
+
+    <script>
+        // --- 1. WebGL Шейдерный Фон ---
+        const canvas = document.getElementById('bg-canvas');
+        const gl = canvas.getContext('webgl');
+
+        if (gl) {
+            const vsSource = `
+                attribute vec4 aVertexPosition;
+                void main() {
+                    gl_Position = aVertexPosition;
+                }
+            `;
+
+            const fsSource = `
+                precision highp float;
+                uniform vec2 u_resolution;
+                uniform float u_time;
+                uniform vec2 u_mouse;
+
+                void main() {
+                    vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+                    uv.x *= u_resolution.x / u_resolution.y;
+
+                    vec2 mouse = u_mouse / u_resolution;
+                    float dist = distance(uv, mouse);
+                    uv += (uv - mouse) * 0.1 * (1.0 / (dist + 0.5));
+
+                    float noise = sin(uv.x * 3.0 + u_time * 0.5) * cos(uv.y * 4.0 - u_time * 0.3);
+                    noise += sin(uv.y * 2.0 - u_time * 0.7) * 0.5;
+                    noise = noise * 0.5 + 0.5;
+
+                    vec3 color1 = vec3(0.02, 0.0, 0.0);
+                    vec3 color2 = vec3(0.15, 0.01, 0.01);
+                    
+                    vec3 finalColor = mix(color1, color2, noise);
+
+                    float vignette = 1.0 - smoothstep(0.3, 1.0, length(uv - 0.5));
+                    finalColor *= vignette;
+
+                    gl_FragColor = vec4(finalColor, 1.0);
+                }
+            `;
+
+            function createShader(gl, type, source) {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error('Shader error:', gl.getShaderInfoLog(shader));
+                    gl.deleteShader(shader);
+                    return null;
+                }
+                return shader;
+            }
+
+            const vertexShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
+            const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+
+            const positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            const positions = [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0];
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+            const positionLocation = gl.getAttribLocation(program, 'aVertexPosition');
+            const timeLocation = gl.getUniformLocation(program, 'u_time');
+            const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+            const mouseLocation = gl.getUniformLocation(program, 'u_mouse');
+
+            gl.enableVertexAttribArray(positionLocation);
+            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+            const mouse = { x: 0, y: 0 };
+            document.addEventListener('mousemove', (e) => {
+                mouse.x = e.clientX;
+                mouse.y = canvas.height - e.clientY;
+            });
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                gl.viewport(0, 0, canvas.width, canvas.height);
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            function render(time) {
+                time *= 0.001;
+                gl.useProgram(program);
+                gl.uniform1f(timeLocation, time);
+                gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+                gl.uniform2f(mouseLocation, mouse.x, mouse.y);
+                gl.clearColor(0.0, 0.0, 0.0, 1.0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                requestAnimationFrame(render);
+            }
+            requestAnimationFrame(render);
+        }
+
+        // --- 2. 3D-наклон карточки профиля ---
+        const card = document.getElementById('profileCard');
+        if (card) {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 20;
+                const rotateY = (centerX - x) / 20;
+
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+            });
+        }
+
+        // --- 3. Эффект печатной машинки ---
+        const lines = [
+            "Сухость — это не отсутствие влаги.",
+            "Это состояние души, когда эмоции",
+            "отфильтрованы до кристальной чистоты.",
+            "Здесь нет места лишнему шуму.",
+            "Только холодный взгляд, пульс в висках",
+            "и ритм, который ты чувствуешь кожей."
+        ];
+        
+        const typeTarget = document.getElementById('typewriter-text');
+        let hasTyped = false;
+
+        function typeWriter() {
+            if (hasTyped) return;
+            hasTyped = true;
+
+            let lineIndex = 0;
+            let charIndex = 0;
+            
+            typeTarget.innerHTML = ''; 
+            
+            const cursor = document.createElement('span');
+            cursor.className = 'cursor-blink';
+            typeTarget.appendChild(cursor);
+
+            function typeChar() {
+                if (lineIndex < lines.length) {
+                    const currentLine = lines[lineIndex];
+                    
+                    if (charIndex < currentLine.length) {
+                        let charText = currentLine.charAt(charIndex);
+                        
+                        if (lines[lineIndex].includes("состояние души") && 
+                           (charIndex >= 4 && charIndex < 18)) {
+                            let span = typeTarget.querySelector('.highlight-temp');
+                            if (!span) {
+                                span = document.createElement('span');
+                                span.className = 'highlight-temp';
+                                typeTarget.insertBefore(span, cursor);
+                            }
+                            span.appendChild(document.createTextNode(charText));
+                        } else {
+                            typeTarget.insertBefore(document.createTextNode(charText), cursor);
+                        }
+                        
+                        charIndex++;
+                        setTimeout(typeChar, 30);
+                    } else {
+                        typeTarget.insertBefore(document.createElement('br'), cursor);
+                        let span = typeTarget.querySelector('.highlight-temp');
+                        if (span) span.classList.remove('highlight-temp');
+                        
+                        lineIndex++;
+                        charIndex = 0;
+                        setTimeout(typeChar, 300);
+                    }
+                } else {
+                    const finalSpan = typeTarget.querySelector('.highlight-temp');
+                    if (finalSpan) finalSpan.className = '';
+                }
+            }
+            typeChar();
+        }
+
+        // --- 4. Появление элементов при скролле ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    
+                    if (entry.target.querySelector('#typewriter-text')) {
+                        setTimeout(typeWriter, 500);
+                    }
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.reveal').forEach((el) => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
